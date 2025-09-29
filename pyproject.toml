@@ -1,7 +1,7 @@
 [project]
 name = "home-task-nozzle"
 version = "0.1.0"
-description = "Add your description here"
+description = "A python project that manipulates a csv file and calculate some metrics"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
