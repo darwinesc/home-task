@@ -1,9 +1,10 @@
 import pandas as pd
 import uuid
-from datetime import datetime
 import re
 import json
 import argparse
+import os
+from datetime import datetime
 
 
 # Validate uuid column
@@ -105,9 +106,14 @@ def main():
         df_discarted_rows = pd.concat([df_empty_rows, df_duplicates], ignore_index=True)
 
         # Save the dataframe to csv file
-        discarded_file = "discarded_rows.csv"
-        df_discarted_rows.to_csv(f'output/{discarded_file}', index=False)
-        print(f"The csv file '{discarded_file}' has been created")
+        discarded_path = "output/discarded_rows.csv"
+
+        # Create output folder id doesn't exists
+        folder = os.path.dirname(discarded_path)
+        os.makedirs(folder, exist_ok=True)
+
+        df_discarted_rows.to_csv(f'{discarded_path}', index=False)
+        print(f"The csv file '{discarded_path}' has been created")
 
         # Validate rows
         df['validate_order_id'] = df['order_id'].apply(validateId)
@@ -150,7 +156,7 @@ def main():
                                 df['validate_ship_service_level']
                             )
         
-        df_usable = df[df['valid_row']]
+        df_usable = df[df['valid_row']].copy()
 
         # Count the usable rows in dataframe
         total_usable_rows = len(df_usable)
@@ -165,9 +171,20 @@ def main():
             "total_usable_rows": total_usable_rows
         }
 
-        createJsonFile(json_data)
+        json_file_response = createJsonFile(json_data)
 
-        df['item_promo_discount'] = pd.to_datetime(df['item_promo_discount'])
+        # Convert to date type
+        df_usable['purchased_date'] = pd.to_datetime(df_usable['purchased_date'])
+
+        # Convert column to numeric
+        df_usable['item_price'] = pd.to_numeric(df_usable['item_price'], errors='coerce')
+        df_usable['item_promo_discount'] = pd.to_numeric(df_usable['item_promo_discount'], errors='coerce')
+
+        total_item_promo_discount = df_usable.groupby('purchased_date')['item_promo_discount'].sum()
+        sum_item_price = df_usable.groupby('purchased_date')[['item_price', 'item_promo_discount']].sum()
+        sum_item_price['total_item_price'] = sum_item_price['item_price'] - sum_item_price['item_promo_discount']
+        
+        
     
     except Exception as e:
         print(f"Error: {e}")
