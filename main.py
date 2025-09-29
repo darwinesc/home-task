@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 import re
 import json
+import argparse
 
 
 # Validate uuid column
@@ -77,9 +78,15 @@ def createJsonFile(json_data):
 def main():
 
     try:
+
+        parser = argparse.ArgumentParser(description="Procesar archivo CSV")
+        parser.add_argument("path", help="CSV file path")
+        args = parser.parse_args()
+        file = args.path
+        print(f"Read file from: {file}")
        
         # Read csv file and create dataframe
-        df = pd.read_csv('input/test.csv')
+        df = pd.read_csv(file)
 
         total_rows = len(df.index)
         print("Total rows: ", total_rows)
