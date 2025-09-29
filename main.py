@@ -2,6 +2,7 @@ import pandas as pd
 import uuid
 from datetime import datetime
 import re
+import json
 
 
 # Validate uuid column
@@ -63,6 +64,15 @@ def validateCurrency(value):
     except (ValueError, TypeError):
         return False
     
+def createJsonFile(json_data):
+    try:
+        # Save the json data in a file
+        json_file = "processing_stats.json"
+        with open(f"output/{json_file}", "w", encoding="utf-8") as file:
+           json.dump(json_data, file, ensure_ascii=False, indent=4)
+        print(f"The json file '{json_file}' has been created")
+    except (ValueError, TypeError):
+        return False
 
 def main():
 
@@ -88,7 +98,9 @@ def main():
         df_discarted_rows = pd.concat([df_empty_rows, df_duplicates], ignore_index=True)
 
         # Save the dataframe to csv file
-        df_discarted_rows.to_csv('output/discarded_rows.csv', index=False)
+        discarded_file = "discarded_rows.csv"
+        df_discarted_rows.to_csv(f'output/{discarded_file}', index=False)
+        print(f"The csv file '{discarded_file}' has been created")
 
         # Validate rows
         df['validate_order_id'] = df['order_id'].apply(validateId)
@@ -136,6 +148,17 @@ def main():
         # Count the usable rows in dataframe
         total_usable_rows = len(df_usable)
         print("Usable rows: ", total_usable_rows)
+
+        # Create a json structure
+        json_data = {
+            "total_rows": total_rows,
+            "total_empty_rows_removed": total_empty_rows,
+            "total_invalid_rows_removed": total_duplicate_rows + total_empty_rows,
+            "total_duplicate_rows_removed": total_duplicate_rows,
+            "total_usable_rows": total_usable_rows
+        }
+
+        createJsonFile(json_data)
 
         #print(df_usable)
     
