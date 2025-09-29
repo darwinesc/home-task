@@ -167,7 +167,7 @@ def main():
 
         createJsonFile(json_data)
 
-        #print(df_usable)
+        df['item_promo_discount'] = pd.to_datetime(df['item_promo_discount'])
     
     except Exception as e:
         print(f"Error: {e}")
