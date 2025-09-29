@@ -1,4 +1,52 @@
-import pandas as pd    
+import pandas as pd
+import uuid
+from datetime import datetime
+import re
+
+
+# Validate uuid column
+def validateId(x):
+    try:
+        # Intenta convertir a UUID (versión 4 por defecto, pero puede ser flexible)
+        uuid_obj = uuid.UUID(str(x))
+        return True
+    except (ValueError, TypeError):
+        return False
+    
+
+# Validate datetime format %Y-%m-%dT%H:%M:%S.%f column
+def validateDatetime(valor):
+    try:
+        datetime.strptime(valor, "%Y-%m-%dT%H:%M:%S.%f")
+        return True
+    except (ValueError, TypeError):
+        return False
+    
+    
+# Validate datetime %Y-%m-%d column
+def validateDate(value):
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+        return True
+    except (ValueError, TypeError):
+        return False
+    
+# Validate a number value     
+def validateNumber(value):
+    try:
+        float(value)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+# Validate a sku value
+def validateSku(value):
+    try:
+        pattern = r'^[A-Za-z0-9]{3}-\d{8}$' # Regex for sku
+        return bool(re.fullmatch(pattern, str(value)))
+    except (ValueError, TypeError):
+        return False
+    
 
 def main():
 
@@ -25,6 +73,27 @@ def main():
 
         # Save the dataframe to csv file
         df_discarted_rows.to_csv('output/discarded_rows.csv', index=False)
+
+        # Validate rows
+        df['validate_order_id'] = df['order_id'].apply(validateId)
+        df['validate_purchased_at'] = df['purchased_at'].apply(validateDatetime)
+        df['validate_purchased_date'] = df['purchased_date'].apply(validateDate)
+        df['validate_purchased_month_ended'] = df['purchased_month_ended'].apply(validateDate)
+        df['validate_order_item_id'] = df['order_item_id'].apply(validateNumber)
+        df['validate_sku'] = df['sku'].apply(validateSku)
+
+        # Validates the entire row
+        df['fila_valida'] = (
+                                df['validate_order_id'] &
+                                df['validate_purchased_at'] &
+                                df['validate_purchased_date'] &
+                                df['validate_order_item_id'] & 
+                                df['validate_sku']
+                            )
+        
+        df_usable = df[df['fila_valida']]
+
+        print(df_usable)
     
     except Exception as e:
         print(f"Error: {e}")
