@@ -189,7 +189,7 @@ def main():
         # Union two dataframes inner by purchased_date 
         df_metrics = pd.merge(total_item_promo_discount, sum_item_price, on='purchased_date', how='inner')
         
-        # Format the values for each columns
+        # Format the values for each columns and create a csv file
         metrics_path = "output/monthly_metrics.csv"
         df_metrics = df_metrics[['total_item_promo_discount','total_item_price']]
         df_metrics.to_csv(f'{metrics_path}', index=False)
