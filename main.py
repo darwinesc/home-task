@@ -180,10 +180,19 @@ def main():
         df_usable['item_price'] = pd.to_numeric(df_usable['item_price'], errors='coerce')
         df_usable['item_promo_discount'] = pd.to_numeric(df_usable['item_promo_discount'], errors='coerce')
 
-        total_item_promo_discount = df_usable.groupby('purchased_date')['item_promo_discount'].sum()
+        # Calculate the metrics
+        #total_item_promo_discount = df_usable.groupby('purchased_date')['item_promo_discount'].sum()
+        total_item_promo_discount = df_usable.groupby('purchased_date').agg(total_item_promo_discount=('item_promo_discount', 'sum'))
         sum_item_price = df_usable.groupby('purchased_date')[['item_price', 'item_promo_discount']].sum()
         sum_item_price['total_item_price'] = sum_item_price['item_price'] - sum_item_price['item_promo_discount']
         
+        # Union two dataframes inner by purchased_date 
+        df_metrics = pd.merge(total_item_promo_discount, sum_item_price, on='purchased_date', how='inner')
+        
+        # Format the values for each columns
+        metrics_path = "output/monthly_metrics.csv"
+        df_metrics = df_metrics[['total_item_promo_discount','total_item_price']]
+        df_metrics.to_csv(f'{metrics_path}', index=False)
         
     
     except Exception as e:
