@@ -1,28 +1,10 @@
 import pandas as pd
-import uuid
 import argparse
 import os
 from python_modules import datetime_module as dt
 from python_modules import utils as ut
 from python_modules import pattern_module as pt
-
-
-# Validate uuid column
-def validateId(x):
-    try:
-        # Intenta convertir a UUID (versión 4 por defecto, pero puede ser flexible)
-        uuid_obj = uuid.UUID(str(x))
-        return True
-    except (ValueError, TypeError):
-        return False
-    
-# Validate a number value     
-def validateNumber(value):
-    try:
-        float(value)
-        return True
-    except (ValueError, TypeError):
-        return False
+from python_modules import number_module as nm
     
 
 def main():
@@ -65,23 +47,23 @@ def main():
         print(f"The csv file '{discarded_path}' has been created")
 
         # Validate rows
-        df['validate_order_id'] = df['order_id'].apply(validateId)
+        df['validate_order_id'] = df['order_id'].apply(nm.validateId)
         df['validate_purchased_at'] = df['purchased_at'].apply(dt.validateDatetime)
         df['validate_purchased_date'] = df['purchased_date'].apply(dt.validateDate)
         df['validate_purchased_month_ended'] = df['purchased_month_ended'].apply(dt.validateDate)
-        df['validate_order_item_id'] = df['order_item_id'].apply(validateNumber)
+        df['validate_order_item_id'] = df['order_item_id'].apply(nm.validateNumber)
         df['validate_sku'] = df['sku'].apply(pt.validateSku)
         df['validate_product_title'] = df['product_title'].apply(pt.validateProductTitle)
         df['validate_product_name_full'] = df['product_name_full'].apply(pt.validateProductTitle)
         df['validate_currency'] = df['currency'].apply(pt.validateCurrency)
-        df['valdate_item_price'] = df['item_price'].apply(validateNumber)
-        df['validate_item_tax'] = df['item_tax'].apply(validateNumber)
-        df['validate_shipping_price'] = df['shipping_price'].apply(validateNumber)
-        df['validate_shipping_tax'] = df['shipping_tax'].apply(validateNumber)
-        df['validate_gift_wrap_price'] = df['gift_wrap_price'].apply(validateNumber)
-        df['validate_gift_wrap_tax'] = df['gift_wrap_tax'].apply(validateNumber)
-        df['validate_item_promo_discount'] = df['item_promo_discount'].apply(validateNumber)
-        df['validate_shipment_promo_discount'] = df['shipment_promo_discount'].apply(validateNumber)
+        df['valdate_item_price'] = df['item_price'].apply(nm.validateNumber)
+        df['validate_item_tax'] = df['item_tax'].apply(nm.validateNumber)
+        df['validate_shipping_price'] = df['shipping_price'].apply(nm.validateNumber)
+        df['validate_shipping_tax'] = df['shipping_tax'].apply(nm.validateNumber)
+        df['validate_gift_wrap_price'] = df['gift_wrap_price'].apply(nm.validateNumber)
+        df['validate_gift_wrap_tax'] = df['gift_wrap_tax'].apply(nm.validateNumber)
+        df['validate_item_promo_discount'] = df['item_promo_discount'].apply(nm.validateNumber)
+        df['validate_shipment_promo_discount'] = df['shipment_promo_discount'].apply(nm.validateNumber)
         df['validate_ship_service_level'] = df['ship_service_level'].apply(pt.validateProductTitle)
 
         # Validates the entire row
